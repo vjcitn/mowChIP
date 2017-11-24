@@ -28,12 +28,15 @@ multimodal Gviz-based visualization of MOWChIP tracks
 data(caoChIP)
 S3paths = mowChInS3()
 if (interactive()) {
- remoteMow = GenomicFiles(files=S3paths, 
+ remoteMowK4me3 = GenomicFiles(files=S3paths[1:4], 
     colData=colData(caoChIP[,c(1,3,5,7)]))
+ remoteMowK27ac = GenomicFiles(files=S3paths[5:8], 
+    colData=colData(caoChIP[,c(9,11,13,15)]))
  require(EnsDb.Hsapiens.v75)
  gg = genes(EnsDb.Hsapiens.v75)
  require(GenomeInfoDb)
  seqlevelsStyle(gg) = "UCSC"
- viewByGene(gf=remoteMow, sym="IGHA2", radius=80000, gstr=gg)
+ viewByGene(gf=remoteMowK4me3, sym="IGHA2", radius=80000, gstr=gg)
+ viewByGene(gf=remoteMowK27ac, sym="SPI1", radius=80000, gstr=gg)
  }
 }

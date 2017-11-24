@@ -3,10 +3,19 @@
 #' mowChInS3()
 #' @export
 mowChInS3 = function() {
-c("http://s3.amazonaws.com/bcfound-mow/GSM1599147_GM12878_K4me3_10K_Rep1.bw",
-"http://s3.amazonaws.com/bcfound-mow/GSM1599149_GM12878_K4me3_1K_Rep1.bw",
-"http://s3.amazonaws.com/bcfound-mow/GSM1599151_GM12878_K4me3_600_Rep1.bw",
-"http://s3.amazonaws.com/bcfound-mow/GSM1599153_GM12878_K4me3_100_Rep1.bw")
+#c("http://s3.amazonaws.com/bcfound-mow/GSM1599147_GM12878_K4me3_10K_Rep1.bw",
+#"http://s3.amazonaws.com/bcfound-mow/GSM1599149_GM12878_K4me3_1K_Rep1.bw",
+#"http://s3.amazonaws.com/bcfound-mow/GSM1599151_GM12878_K4me3_600_Rep1.bw",
+#"http://s3.amazonaws.com/bcfound-mow/GSM1599153_GM12878_K4me3_100_Rep1.bw")
+k4n = c("GSM1599147_GM12878_K4me3_10K_Rep1.bw",
+"GSM1599149_GM12878_K4me3_1K_Rep1.bw",
+"GSM1599151_GM12878_K4me3_600_Rep1.bw",
+"GSM1599153_GM12878_K4me3_100_Rep1.bw")
+acn = c("GSM1599155_GM12878_K27ac_10K_Rep1.bw",
+"GSM1599157_GM12878_K27ac_1K_Rep1.bw",
+"GSM1599159_GM12878_K27ac_600_Rep1.bw",
+"GSM1599161_GM12878_K27ac_100_Rep1.bw")
+sprintf("http://s3.amazonaws.com/bcfound-mow/%s", c(k4n,acn))
 }
 
 #' @importFrom GenomeInfoDb "seqlevelsStyle<-"
@@ -44,13 +53,16 @@ filterToGene = function( gf, geneSymbol,
 #' data(caoChIP)
 #' S3paths = mowChInS3()
 #' if (interactive()) {
-#'  remoteMow = GenomicFiles(files=S3paths, 
+#'  remoteMowK4me3 = GenomicFiles(files=S3paths[1:4], 
 #'     colData=colData(caoChIP[,c(1,3,5,7)]))
+#'  remoteMowK27ac = GenomicFiles(files=S3paths[5:8], 
+#'     colData=colData(caoChIP[,c(9,11,13,15)]))
 #'  require(EnsDb.Hsapiens.v75)
 #'  gg = genes(EnsDb.Hsapiens.v75)
 #'  require(GenomeInfoDb)
 #'  seqlevelsStyle(gg) = "UCSC"
-#'  viewByGene(gf=remoteMow, sym="IGHA2", radius=80000, gstr=gg)
+#'  viewByGene(gf=remoteMowK4me3, sym="IGHA2", radius=80000, gstr=gg)
+#'  viewByGene(gf=remoteMowK27ac, sym="SPI1", radius=80000, gstr=gg)
 #'  }
 #' @export
 viewByGene = function(gf=caoChIP[,1:6], sym="IGHA2",
@@ -74,7 +86,7 @@ genesInRegion = function(chr, start, end, gstr, radius=0,
   ans = subsetByOverlaps(gstr, GRanges(chr, IRanges(start,end))+radius)
   ans = ans[which(ans$gene_biotype %in% biotypes)]
   seqlevels(ans) = chr
-  if (asGRT) return(GeneRegionTrack(ans, showId=TRUE))
+  if (asGRT) return(GeneRegionTrack(ans, showId=TRUE, name=chr[1]))
   ans
 }
 

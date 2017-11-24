@@ -1,0 +1,92 @@
+---
+title: "mowChIP -- exploratory analysis of ChIP-seq with microfluidic oscillatory washing"
+author: "Vincent J. Carey, stvjc at channing.harvard.edu"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Exploring MOWChIP data}
+  %\VignetteEncoding{UTF-8}
+output:
+  BiocStyle::pdf_document:
+    toc: yes
+    number_sections: yes
+  BiocStyle::html_document:
+    highlight: pygments
+    number_sections: yes
+    theme: united
+    toc: yes
+bibliography: MOWChIP.bib
+---
+
+```{r setup,echo=FALSE,results="hide"}
+suppressPackageStartupMessages({
+suppressMessages({
+library(mowChIP)
+library(aws.s3)
+})
+})
+```
+
+# Introduction 
+
+The Nature Methods paper of @Cao2015 details a technology for
+improving chromatin immunoprecipitation (ChIP) assays,
+demonstrating good sensitivity for samples with as few
+as 100 cells.  This package will provide access to an archive of
+high-resolution outcomes from this protocol, along with
+tools for visualization and inference on key questions
+related to implementation and interpretation.
+
+# Remote data resources
+
+We have created an AWS S3 bucket with eight bigwig files
+with genome-wide scores for histone modification as measured
+by MOWChIP-seq on samples with 10K, 1K, 600, and 100 cells.
+For the following code to run, it appears that you will have
+to have AWS credential established for the `r CRANpkg("aws.s3")`
+bucket queries to work, despite the fact that read bucket
+permission is granted to the public at large.
+
+```{r dolist, cache=TRUE}
+library(aws.s3)
+info = get_bucket_df("bcfound-mow")
+info[,c(1,4)]
+```
+
+We use `r Biocpkg("GenomicFiles")` utilities to manage
+access to these files.  The file metadata is provided
+in the `caoChIP` `GenomicFiles` instance, and the
+paths are assigned using information about the bucket 
+content URLs.
+
+```{r setupdat}
+library(GenomicFiles)
+data(caoChIP)
+names(colData(caoChIP))
+colData(caoChIP)[c(1,3,5,7),c("mark", "numCells")]
+str(mowChInS3()) # full URL to bucket contents
+```
+
+
+# Static visualization
+
+The `viewByGene` function plots coverage
+over gene regions for selected genes.
+The following plots data related
+to Figure 2c of the main paper.
+The function accepts gene symbol and radius around
+gene to display, and uses the Bioconductor
+GenomicFiles data store, in this
+case a collection of bigwig files in a publicly
+accessible S3 bucket, to acquire the coverage values.
+
+```{r dopl, fig=TRUE, fig.height=4}
+S3paths = mowChInS3()
+remoteMowK27ac = GenomicFiles(files=S3paths[5:8], 
+    colData=colData(caoChIP[,c(9,11,13,15)]))
+require(EnsDb.Hsapiens.v75)
+gg = genes(EnsDb.Hsapiens.v75)
+require(GenomeInfoDb)
+seqlevelsStyle(gg) = "UCSC"
+viewByGene(gf=remoteMowK27ac, sym="SPI1", radius=80000, gstr=gg)
+```
