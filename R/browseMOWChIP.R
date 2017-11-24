@@ -1,3 +1,35 @@
+# borrowed from erma for shinyapp in november 
+
+genemodel = function(key, keytype="SYMBOL", annoResource=Homo.sapiens,
+    keepStandardChromosomes=TRUE) {
+#
+# purpose is to get exon addresses given a symbol
+# propagate seqinfo from annotation resource
+#
+if (class(annoResource)=="OrganismDb") {
+  oblig=c("EXONCHROM", "EXONSTART", "EXONEND", "EXONSTRAND", "EXONID")
+  addrs = AnnotationDbi::select(annoResource, keys=key, keytype=keytype, columns=oblig)
+  ans = GRanges(addrs$EXONCHROM, IRanges(addrs$EXONSTART, addrs$EXONEND),
+      strand=addrs$EXONSTRAND, exon_id=addrs$EXONID)
+  }
+else if (class(annoResource)=="EnsDb") {
+  oblig = c("SEQNAME", "EXONSEQSTART", "EXONSEQEND", "SEQSTRAND",
+        "EXONIDX")
+  addrs = AnnotationDbi::select(annoResource, keys=key, keytype=keytype, columns=oblig)
+  ans = GRanges(addrs$SEQNAME,
+        IRanges(addrs$EXONSEQSTART, addrs$EXONSEQEND),
+        strand = addrs$SEQSTRAND, exon_id = addrs$EXONIDX)
+  }
+  else stop("annoResource must be of class OrganismDb or EnsDb")
+  mcols(ans)[[keytype]] = key
+  useq = unique(as.character(seqnames(ans)))
+  si = seqinfo(annoResource)
+  seqinfo(ans) = si[useq,]
+  if (keepStandardChromosomes)
+       return(keepStandardChromosomes(ans, pruning.mode="coarse"))
+  ans
+}
+
 #' create HTTP paths to S3 bucket holding selected MOWChIP bigwig files
 #' @examples
 #' mowChInS3()
@@ -39,7 +71,6 @@ filterToGene = function( gf, geneSymbol,
 #' @import EnsDb.Hsapiens.v75 
 #' @import GenomicFiles 
 #' @import ensembldb 
-#' @import erma
 #' @import GenomicRanges
 #' @import IRanges
 #' @param gf GenomicFiles instance giving paths to .bw files

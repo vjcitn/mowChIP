@@ -1,11 +1,11 @@
 Package: mowChIP
 Title: Infrastructure for microfluidic oscillatory washing-based ChIP
 Description: Define infrastructure for microfluidic oscillatory washing-based ChIP.
-Version: 0.0.3
+Version: 0.0.4
 Author: Vince Carey
 Suggests: knitr, BiocParallel, aws.s3
 Imports: Gviz, GenomeInfoDb, GenomicRanges, IRanges, shiny
-Depends: R (>= 3.4.2), GenomicFiles, erma (>= 0.11.1), ensembldb, 
+Depends: R (>= 3.4.2), GenomicFiles, ensembldb, 
 	EnsDb.Hsapiens.v75
 Maintainer: VJ Carey <stvjc@channing.harvard.edu>
 License: Artistic-2.0
